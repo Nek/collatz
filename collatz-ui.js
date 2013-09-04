@@ -44,7 +44,8 @@ $(function() {
   $('#level').slider({
     value: level, min: 1, max: max, slide: function(e, ui) {
       level = ui.value;
-      plotLevel();
+      colorize(errorMode);
+      plotLevel(1000);
     }
   });
 
