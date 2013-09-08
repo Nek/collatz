@@ -10,8 +10,8 @@ $(function() {
 
   var vis = d3.select("#vis")
     .append("svg")
-      .attr("width", r * 2)
-      .attr("height", r * 2)
+      .attr("width", r * 4)
+      .attr("height", r * 4)
     .append("g")
       .attr("transform", "translate(" + r + "," + r + ")");
 
@@ -28,7 +28,7 @@ $(function() {
   function plotLevel(duration) {
       $('#level').slider({value: level});
       $('#level-val').text(level);
-      vis.call(collatz(level, duration));
+      vis.call(collatz(level, duration, errorMode));
       colorize(errorMode);
   }
 
@@ -82,14 +82,25 @@ $(function() {
 
     level = next;
 
-    plotLevel(300);
+    plotLevel(0);
   }
 
   function animate() {
     if (timer) clearInterval(timer);
-    timer = setInterval(errorMode ? errorAnimation : normalAnimation, duration);
+    if (errorMode) startError();
+    else startNormal();
     $(this).hide();
     $('#stop').show();
+  }
+
+  function startNormal() {
+    timer = setInterval(normalAnimation, duration);
+    normalAnimation();
+  }
+
+  function startError() {
+    timer = setTimeout(startError, Math.random()*200); 
+    errorAnimation();
   }
 
   $('#play').click(animate);

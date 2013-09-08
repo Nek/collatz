@@ -46,8 +46,11 @@ var reverseCollatz = function(r, max) {
 
   var oldNodes = {};
 
-  function plot(depth, duration) {
+  var random = false;
+
+  function plot(depth, duration,r) {
     return function() {
+      random = r;
       var vis = this,
           nodes = tree.children(treeChildren(depth))(1);
 
@@ -63,6 +66,7 @@ var reverseCollatz = function(r, max) {
           .attr("y1", function(d) { return ys(d.oldParent); })
           .attr("x2", function(d) { return xs(d.child); })
           .attr("y2", function(d) { return ys(d.child); });
+
       line.transition()
           .duration(duration)
           .attr("x1", function(d) { return xs(d.parent); })
@@ -133,9 +137,19 @@ var reverseCollatz = function(r, max) {
     });
   }
 
+  var rnds = [];
+  function rand(x,y) {
+    if (rnds[""+x+y] === undefined) rnds[""+x+y] = Math.random();
+    return rnds[""+x+y];
+  }
+
+  function damp() {
+    return random ? 1 : 0;
+  }
+
   // Radial scales for x and y.
-  function xs(d) { return d.y * Math.cos((d.x - 90) / 180 * Math.PI); }
-  function ys(d) { return d.y * Math.sin((d.x - 90) / 180 * Math.PI); }
+  function xs(d) { return d.y * Math.cos((d.x - 90) / 180 * Math.PI) + damp()*(rand(d.x,d.y)*200 - 100) + 720/2; }
+  function ys(d) { return d.y * Math.sin((d.x - 90) / 180 * Math.PI) + damp()*(rand(d.x,d.y)*200 - 100) + 720/2; }
 
   return plot;
 };
