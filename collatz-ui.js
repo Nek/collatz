@@ -9,8 +9,10 @@ $(function() {
   };
 
 
-  var params = window.params =  new RiftGraphParams();
+  var params =  new RiftGraphParams();
   var gui = new dat.GUI();
+  gui.remember(params);
+
   var stopped = gui.add(params, 'stopped');
   var mode = gui.add(params,'mode', {'Normal':0, 'Error':1});
 
