@@ -1,39 +1,52 @@
 $(function() {
+
+  var RiftGraphParams = function() {
+    this.stopped = true;
+    this.mode = 0;
+    this.BPM = 60;
+    this.spanFrom = 100;
+    this.spanTo = 200;
+  };
+
+
+  var params = window.params =  new RiftGraphParams();
+  var gui = new dat.GUI();
+  var stopped = gui.add(params, 'stopped');
+  var mode = gui.add(params,'mode', {'Normal':0, 'Error':1});
+
+  var normalModeFolder = gui.addFolder("Normal Mode");
+  var BPM = normalModeFolder.add(params, 'BPM', 0, 140);
+  var errorModeFolder = gui.addFolder("Error Mode");
+  var spanFrom = errorModeFolder.add(params, 'spanFrom', 0, 1000);
+  var spanTo = errorModeFolder.add(params, 'spanTo', 0, 1000);
+
+  normalModeFolder.open();
+  errorModeFolder.open();
+
   var timer = null,
       level = 0,
       min = 1,
       max = 18,
       speed = 1,
-      duration = 1000,
-      r = 720 / 2,
-      collatz = reverseCollatz(r, max);
+      d = 720,
+      collatz = reverseCollatz(d/2, max);
 
   var vis = d3.select("#vis")
     .append("svg")
-      .attr("width", r * 4)
-      .attr("height", r * 4)
+      .attr("width", d * 2)
+      .attr("height", d * 2)
     .append("g")
-      .attr("transform", "translate(" + r + "," + r + ")");
+      .attr("transform", "translate(" + d/2 + "," + d/2 + ")");
 
-  var normal = { dark: '#fa750d', light: '#ffe48a' }; 
-  var error = { dark: '#d85133', light: '#fa750d'};
-  var errorMode = false;
+  var colors = [{ dark: '#fa750d', light: '#ffe48a' },{ dark: '#d85133', light: '#fa750d'}];
 
-  $('#error').change(function(e){
-    errorMode = e.target.checked;
-    colorize(errorMode);
-    animate();
-  })
-
-  function plotLevel(duration) {
-      $('#level').slider({value: level});
-      $('#level-val').text(level);
-      vis.call(collatz(level, duration, errorMode));
-      colorize(errorMode);
+  function plotLevel(d) {
+      vis.call(collatz(level, d, [false,true][params.mode]));
+      colorize();
   }
 
-  function colorize(errorMode) {
-    var o = errorMode ? error : normal;
+  function colorize() {
+    var o = colors[params.mode];
     var nodes = d3.selectAll(".node");
     nodes.selectAll('text').style("fill", o.dark);
     nodes.selectAll('circle').style("fill", o.dark);
@@ -41,20 +54,12 @@ $(function() {
     d3.selectAll('.link').selectAll("line").style("stroke", o.light);
   }
 
-  $('#level').slider({
-    value: level, min: 1, max: max, slide: function(e, ui) {
-      level = ui.value;
-      colorize(errorMode);
-      plotLevel(1000);
-    }
-  });
-
   function normalAnimation() {
       if (level > max || level < min) speed = -speed;
       if (level > max) level = max;
       if (level < min) level = min;
       level += speed;
-      plotLevel(1000);
+      plotLevel(60000/params.BPM);
   }
 
   function rand(from,to) {
@@ -64,7 +69,6 @@ $(function() {
   function errorAnimation() {
     // 1. + || -
     // 2. level + 2 > max -
-
     var dir = Math.random() > .5 ? 1 : -1;
 
     var from = level + 2 * dir;
@@ -76,7 +80,6 @@ $(function() {
 
     var to = dir > 0 ? max : min;
 
-    console.log(from,to);
     var next = rand(from,to);
 //    console.log(min,max, next);
 
@@ -86,28 +89,51 @@ $(function() {
   }
 
   function animate() {
-    if (timer) clearInterval(timer);
-    if (errorMode) startError();
-    else startNormal();
-    $(this).hide();
-    $('#stop').show();
+    console.log("!")
+    if (timer) {
+      if (params.mode) clearTimeout(timer);
+      else clearInterval(timer);
+    }
+    [startNormal, startError][params.mode]();
   }
 
   function startNormal() {
-    timer = setInterval(normalAnimation, duration);
+    timer = setInterval(normalAnimation, 60000/params.BPM);
     normalAnimation();
   }
 
   function startError() {
-    timer = setTimeout(startError, Math.random()*200); 
+    var span = params.spanTo - params.spanFrom
+    timer = setTimeout(startError, Math.random()*span + params.spanFrom); 
     errorAnimation();
   }
 
-  $('#play').click(animate);
-
-  $('#stop').click(function() {
-    if (timer) clearInterval(timer);
-    $(this).hide();
-    $('#play').show();
+  mode.onChange(function(v){ 
+    colorize();
+    if (!params.stopped) animate();
   });
+
+  stopped.onChange(function(v) {
+    playing = !v;
+    if (v) {
+      if (timer) {
+        if (params.mode) clearTimeout(timer);
+        else clearInterval(timer);
+      }
+    } else animate();
+  })
+
+  BPM.onChange(function(v){
+    if (!params.mode && !params.stopped) animate(); 
+  })
+
+  spanFrom.onChange(function(v) {
+      if (v > params.spanTo) spanTo.setValue(v);
+  });
+
+  spanTo.onChange(function(v){
+      if (v < params.spanFrom) spanFrom.setValue(v);
+  });
+
+
 });

@@ -5,24 +5,21 @@
     <title>Collatz Graph: All Numbers Lead to One - Jason Davies</title>
     <link rel="stylesheet" href="media/style.css">
     <link rel="stylesheet" href="collatz.css">
-    <link rel="stylesheet" href="media/ui-lightness/jquery-ui-1.8rc3.custom.css">
+    <script src="dat.gui.min.js"></script>
     <script src="media/js/d3.min.js"></script>
     <script src="media/js/d3.layout.min.js"></script>
     <script src="media/js/underscore-min.js"></script>
     <script src="media/js/jquery.min.js"></script>
-    <script src="media/js/jquery-ui-1.8rc3.custom.min.js"></script>
     <meta name="author" content="Jason Davies">
     <link rel="image_src" href="collatz.png">
   </head>
   <body>
     <div id="lines"></div>
-    <p><label for="level">Orbit length</label>: <span id="level"></span> <span id="level-val">1</span>
-    <p><input type="button" value="Play" id="play">
-    <p><input type="checkbox" value="3rr0r" id="error">
-    <p><input type="button" value="Stop" id="stop" style="display: none">
+    <div id="wrapper">
     <div id="vis">
       <script src="collatz.js"></script>
       <script src="collatz-ui.js"></script>
+    </div>
     </div>
   </body>
 </html>
