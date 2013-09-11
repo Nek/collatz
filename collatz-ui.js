@@ -6,6 +6,9 @@ $(function() {
     this.BPM = 60;
     this.spanFrom = 100;
     this.spanTo = 200;
+    this.fullscreen = function() {
+      document.body.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
   };
 
 
@@ -19,6 +22,8 @@ $(function() {
   var errorModeFolder = gui.addFolder("Error Mode");
   var spanFrom = errorModeFolder.add(params, 'spanFrom', 0, 1000);
   var spanTo = errorModeFolder.add(params, 'spanTo', 0, 1000);
+
+  gui.add(params, 'fullscreen');
 
   normalModeFolder.open();
   errorModeFolder.open();
